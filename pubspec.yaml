@@ -44,3 +44,12 @@ flutter:
           weight: 600
         - asset: assets/fonts/Crimson_Text/CrimsonText-Bold.ttf
           weight: 700
+    - family: QuickSand
+      fonts:
+          - asset: assets/fonts/quick_sand/Quicksand-Regular.ttf
+          - asset: assets/fonts/quick_sand/Quicksand-Regular.ttf
+            weight: 400
+          - asset: assets/fonts/quick_sand/Quicksand-Medium.ttf
+            weight: 600
+          - asset: assets/fonts/quick_sand/Quicksand-Bold.ttf
+            weight: 700

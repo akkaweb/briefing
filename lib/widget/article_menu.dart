@@ -1,5 +1,5 @@
 import 'package:briefing/model/article.dart';
-import 'package:briefing/service/database.dart';
+import 'package:briefing/service/database/database.dart';
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
 

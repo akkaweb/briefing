@@ -1,4 +1,5 @@
 import 'package:briefing/model/article.dart';
+import 'package:briefing/model/news.dart';
 import 'package:briefing/widget/article_thumbnail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
@@ -17,28 +18,18 @@ class ArticleTitleSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Row(children: <Widget>[
-                Expanded(
-                  child: Text(
-                    article.source,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.subtitle,
-                  ),
-                ),
-              ]),
               Container(
-                padding: EdgeInsets.fromLTRB(0.0, 4.0, 8.0, 4.0),
+                padding: EdgeInsets.fromLTRB(0.0, 0.0, 8.0, 0.0),
                 child: ListTile(
                   contentPadding: EdgeInsets.symmetric(horizontal: 1.0),
-                  title: Text(article.title,
+                  title: Text(article.title ?? "",
                       softWrap: true,
                       style: Theme.of(context)
                           .textTheme
                           .subhead
-                          .copyWith(fontWeight: FontWeight.bold, fontSize: 20)),
+                          .copyWith(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
-              )
+              ),
             ],
           ),
         ),

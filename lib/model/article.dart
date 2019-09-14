@@ -2,8 +2,8 @@ import 'package:intl/intl.dart';
 
 class Article {
   num id;
-  final String title;
-  final String description;
+  String title;
+  String description;
   final String url;
   final String publishedAt;
   final String author;

@@ -4,11 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'package:briefing/model/article.dart';
+import 'package:briefing/model/news.dart';
+import 'package:briefing/model/news.dart' as cate;
 import 'package:xml/xml.dart';
 
 const base_url = 'https://newsapi.org/v2';
 const api_key = '11cd66d3a6994c108e7fb7d92cee5e12';
 const local_news_url = 'https://news.google.com/rss';
+const category_url = 'https://vnnews.apptonghop.com/api/categories';
 
 String getUrl(String country, String category) {
   var url = '$base_url/top-headlines?page=1';
@@ -19,6 +22,17 @@ String getUrl(String country, String category) {
     url += '&category=$category';
   }
   return url += '&apiKey=$api_key';
+}
+
+String getNewsUrl(int categoryId, int publisherId) {
+  var url = 'https://vnnews.apptonghop.com/api/articles?';
+  if(categoryId > 0) {
+    url += "category_id=$categoryId";
+  }
+  if(publisherId > 0) {
+    url += "publisher_id=$publisherId";
+  }
+  return url;
 }
 
 class ApiService {
@@ -35,18 +49,53 @@ class ApiService {
     return articles;
   }
 
-  static Future<List<Article>> getLocalNewsFromNetwork() async {
-    var articles = [];
+  static Future<List<News>> getLocalNewsFromNetwork(category) async {
+    var news = [];
     try {
-      final response = await http.get(local_news_url);
+      final response = await http.get(getNewsUrl(category, 0));
       if (response.statusCode == 200) {
-        articles = await compute(parseArticlesXml, response.body);
+        print('=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
+        news = await compute(parseNews, response.body);
       }
     } catch (error) {
       print('=== API::LocalNewsFromNetwork::Error ${error.toString()}');
     }
-    return articles;
+    return news;
   }
+
+  static Future<List<cate.Category>> getAllCategory() async {
+    var categories = [];
+    try {
+      final response = await http.get(category_url);
+      if (response.statusCode == 200) {
+        print('=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
+        categories = await compute(parseCategory, response.body);
+      }
+    } catch (error) {
+      print('=== API::LocalNewsFromNetwork::Error ${error.toString()}');
+    }
+    return categories;
+  }
+}
+
+List<News> parseNews(String responseBody) {
+  var articles = [];
+  final parsed = json.decode(responseBody);
+  if (parsed['code'] == 200) {
+    articles = List<News>.from(parsed['data']
+        .map((article) => News.fromJson(article)));
+  }
+  return articles;
+}
+
+List<cate.Category> parseCategory(String responseBody) {
+  var articles = [];
+  final parsed = json.decode(responseBody);
+  if (parsed['code'] == 200) {
+    articles = List<cate.Category>.from(parsed['data']
+        .map((article) => cate.Category.fromJson(article)));
+  }
+  return articles;
 }
 
 List<Article> parseArticles(String responseBody) {

@@ -1,6 +1,7 @@
 import 'package:briefing/model/article.dart';
+import 'package:briefing/model/news.dart';
 import 'package:briefing/service/api_service.dart';
-import 'package:briefing/service/database.dart';
+import 'package:briefing/service/database/database.dart';
 
 class RepositoryCommon {
   static close() {
@@ -50,13 +51,14 @@ class RepositoryArticle {
   //ApiService
   static Future<List<Article>> getArticleListFromNetwork(
       String country, String category) async {
-    if (category != null && category == 'local') {
-      return getLocalNewsFromNetwork();
-    }
     return ApiService.getArticlesFromNetwork(country, category);
   }
 
-  static Future<List<Article>> getLocalNewsFromNetwork() async {
-    return ApiService.getLocalNewsFromNetwork();
+  static Future<List<News>> getLocalNewsFromNetwork(category) async {
+    return ApiService.getLocalNewsFromNetwork(category);
+  }
+
+  static Future<List<Category>> getAllCategory() async {
+    return ApiService.getAllCategory();
   }
 }

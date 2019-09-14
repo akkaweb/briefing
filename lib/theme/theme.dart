@@ -32,21 +32,21 @@ TextTheme _buildAppTextTheme(TextTheme base) {
   return base
       .copyWith(
           title: base.title.copyWith(
-              fontFamily: 'Libre_Franklin',
+              fontFamily: 'QuickSand',
               fontWeight: FontWeight.bold,
               fontSize: 24.0),
           subhead: base.subhead.copyWith(
-            fontFamily: 'Crimson_Text',
+            fontFamily: 'QuickSand',
             fontSize: 18.0,
           ),
-          caption: base.caption.copyWith(fontFamily: 'Libre_Franklin'),
-          button: base.button.copyWith(fontFamily: 'Libre_Franklin'),
+          caption: base.caption.copyWith(fontFamily: 'QuickSand'),
+          button: base.button.copyWith(fontFamily: 'QuickSand'),
           subtitle: base.subtitle.copyWith(
-            fontFamily: 'Libre_Franklin',
+            fontFamily: 'QuickSand',
             fontSize: 18.0,
           ))
       .apply(
-          fontFamily: 'Crimson_Text',
+          fontFamily: 'QuickSand',
           displayColor: themeAppGrey800,
           bodyColor: themeAppGrey800);
 }

@@ -1,5 +1,6 @@
 import 'package:briefing/bookmarked_article_list.dart';
-import 'package:briefing/briefing_sliver_list.dart';
+import 'package:briefing/news_list.dart';
+import 'package:briefing/video_list.dart';
 import 'package:briefing/model/article.dart';
 import 'package:briefing/theme/theme.dart';
 import 'package:briefing/widget/main_sliverappbar.dart';
@@ -15,9 +16,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Briefing',
+      title: 'Báo đây',
       theme: buildAppTheme(),
-      home: MyHomePage(title: 'Briefing'),
+      home: MyHomePage(title: 'Báo đây'),
     );
   }
 }
@@ -52,9 +53,11 @@ class _MyHomePageState extends State<MyHomePage> {
       if (menus[_selectedIndex] == Menu.favorites) {
         return BookmarkArticleList();
       }
-      if (menus[_selectedIndex] == Menu.local ||
-          menus[_selectedIndex] == Menu.headlines) {
-        return BriefingSliverList(menu: menus[_selectedIndex]);
+      if (menus[_selectedIndex] == Menu.local) {
+        return NewsList(menu: menus[0]);
+      }
+      if(menus[_selectedIndex] == Menu.headlines) {
+        return VideoList();
       }
       return SliverList(
           delegate: SliverChildListDelegate([
@@ -81,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
           key: _scaffoldKey,
           body: CustomScrollView(
             slivers: <Widget>[
-              MainSliverAppBar(title: 'Briefing'),
+              MainSliverAppBar(title: 'Báo Đây'),
               getScreen(),
             ],
           ),
@@ -90,30 +93,30 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               decoration: BoxDecoration(boxShadow: [
                 BoxShadow(
-                    color: Colors.cyan[100],
+                    color: Colors.grey[100],
                     offset: Offset(-2.0, 2.0),
                     blurRadius: 2.0,
                     spreadRadius: 2.0)
               ]),
-              height: 72.0,
+              height: 60.0,
               child: BottomNavigationBar(
                 selectedItemColor: Theme.of(context).accentColor,
                 currentIndex: _selectedIndex,
                 onTap: (val) => _onItemTapped(val),
                 type: BottomNavigationBarType.fixed,
                 backgroundColor: Theme.of(context).primaryColor,
-                selectedFontSize: 18.0,
-                unselectedFontSize: 17.0,
+                selectedFontSize: 14.0,
+                unselectedFontSize: 12.0,
                 items: [
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.local_library), title: Text('Local')),
+                      icon: Icon(Icons.library_books), title: Text('Tin tức')),
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.language), title: Text('Headlines')),
+                      icon: Icon(Icons.personal_video), title: Text('Videos')),
                   BottomNavigationBarItem(
                       icon: Icon(Icons.bookmark_border),
-                      title: Text('Favorites')),
+                      title: Text('Đã lưu')),
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.filter_none), title: Text('Agencies'))
+                      icon: Icon(Icons.person), title: Text('Cài đặt'))
                 ],
                 elevation: 5.0,
               ),

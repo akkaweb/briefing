@@ -3,18 +3,20 @@ import 'dart:async';
 import 'package:briefing/bloc/bloc_article.dart';
 import 'package:briefing/briefing_card.dart';
 import 'package:briefing/model/article.dart';
+import 'package:briefing/model/news.dart';
+import 'package:briefing/model/news.dart' as cate;
 import 'package:flutter/material.dart';
 
-class BriefingSliverList extends StatefulWidget {
+class NewsList extends StatefulWidget {
   final Menu menu;
 
-  const BriefingSliverList({Key key, this.menu}) : super(key: key);
+  const NewsList({Key key, this.menu}) : super(key: key);
 
   @override
-  _BriefingSliverListState createState() => _BriefingSliverListState();
+  _NewsListState createState() => _NewsListState();
 }
 
-class _BriefingSliverListState extends State<BriefingSliverList> {
+class _NewsListState extends State<NewsList> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   ArticleListBloc _bloc;
@@ -23,13 +25,14 @@ class _BriefingSliverListState extends State<BriefingSliverList> {
   void initState() {
     super.initState();
     _bloc = ArticleListBloc();
+    _bloc.getCategory();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
   }
 
   Future<void> _onRefresh() async {
 //    await _bloc.refresh()
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: 2));
   }
 
   @override
@@ -40,25 +43,18 @@ class _BriefingSliverListState extends State<BriefingSliverList> {
 
   @override
   Widget build(BuildContext context) {
-    _bloc.menuSubject.sink.add(widget.menu);
-    if (widget.menu != null && widget.menu == Menu.local) {
-      _bloc.categorySink.add('local');
-    } else {
-      _bloc.categorySink.add('All');
-    }
-
     return SliverList(
       delegate: SliverChildListDelegate([
-        if (widget.menu == Menu.headlines)
-          StreamBuilder<String>(
-              stream: _bloc.categoryObservable,
-              builder: (context, snapshot) {
-                return Card(
-                  margin: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0.0)),
-                  elevation: 1.0,
-                  child: Container(
+        StreamBuilder<List<Category>>(
+          stream: _bloc.categoryListObservable,
+          initialData: List(),
+          builder: (context, snapshot) {
+            return Card(
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0.0)),
+                elevation: 1.0,
+                child: Container(
                     margin: EdgeInsets.symmetric(vertical: 12.0),
                     height: 30.0,
                     width: MediaQuery.of(context).size.width,
@@ -66,29 +62,27 @@ class _BriefingSliverListState extends State<BriefingSliverList> {
                       physics: ScrollPhysics(),
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
-                      children: categories.keys
-                          .where((category) => category != 'local')
+                      children: snapshot.data
                           .map(
                             (category) => Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: ChoiceChip(
-                                  selectedColor: Theme.of(context).accentColor,
-                                  label: Text(category),
-                                  selected: snapshot.data == category,
-                                  onSelected: (val) {
-                                    _refreshIndicatorKey.currentState.show();
-                                    _bloc.categorySink.add(category);
-                                  }),
-                            ),
-                          )
+                          padding:
+                          const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: ChoiceChip(
+                              selectedColor: Theme.of(context).accentColor,
+                              label: Text(category.name),
+                              selected: category.id == _bloc.categorySelected,
+                              onSelected: (val) {
+                                _refreshIndicatorKey.currentState.show();
+                                _bloc.categorySink.add(category.id);
+                              }),
+                        ),
+                      )
                           .toList(),
-                    ),
-                  ),
-                );
-              }),
+                    )));
+          },
+        ),
         StreamBuilder<List<Article>>(
-            stream: _bloc.articleListObservable,
+            stream: _bloc.newsListObservable,
             initialData: List(),
             builder: (context, snapshot) {
               debugPrint("!!!snapshot state: ${snapshot.connectionState}!!!");
