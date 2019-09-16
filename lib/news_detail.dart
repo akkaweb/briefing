@@ -63,7 +63,6 @@ class _DetailPageState extends State<DetailPage> {
             systemNavigationBarColor: Colors.white,
             systemNavigationBarIconBrightness: Brightness.dark,
           ),
-          child: SafeArea(
               child: Scaffold(
             appBar: AppBar(
               title: Text(widget.title, style: Theme.of(context)
@@ -140,7 +139,6 @@ class _DetailPageState extends State<DetailPage> {
                             ],
                           ))),
           )),
-        ),
       ),
     );
   }

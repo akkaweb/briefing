@@ -1,6 +1,7 @@
 import 'package:briefing/route/navigation_service.dart';
 import 'package:briefing/service/locator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 class NewsVideoPlayer extends StatefulWidget {
@@ -46,10 +47,20 @@ class _NewsVideoPlayerState extends State<NewsVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light.copyWith(
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+      statusBarColor: Theme.of(context).primaryColor,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ));
+
     return MaterialApp(
       title: 'Video',
       home: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.white,
           title: Text(
             "Video",
             style: Theme.of(context)
