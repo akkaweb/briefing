@@ -14,6 +14,7 @@ class News extends Article {
   String apiGetContent;
   String thumbUrl;
   bool bookmarked = false;
+  List<NewsContent> newContent;
 
   News(
   {id,
@@ -37,9 +38,46 @@ class News extends Article {
       this.thumbHeight,
       this.apiGetContent,
       this.thumbUrl,
-      this.bookmarked});
+      this.bookmarked,
+  this.newContent});
 
   News.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    title = json['title'];
+    description = json['description'];
+    if (json['images'] != null) {
+      images = new List<Images>();
+      json['images'].forEach((v) {
+        images.add(new Images.fromJson(v));
+      });
+    }
+    hasImage = json['has_image'];
+    hasVideo = json['has_video'];
+    publisher = json['publisher'] != null
+        ? new Publisher.fromJson(json['publisher'])
+        : null;
+    categoryNews = json['category'] != null
+        ? new Category.fromJson(json['category'])
+        : null;
+
+    if (json['content'] != null) {
+      newContent = new List<NewsContent>();
+      json['content'].forEach((v) {
+        newContent.add(new NewsContent.fromJson(v));
+      });
+    }
+    if(categoryNews != null) {
+      source = categoryNews.name ?? "";
+    }
+    date = json['date'];
+    dateTime = json['datetime'];
+    thumbUrl = json['thumb_url'];
+    thumbWidth = json['thumb_width'];
+    thumbHeight = json['thumb_height'];
+    apiGetContent = json['api_get_content'];
+  }
+
+  News fromJson(Map<String, dynamic> json) {
     id = json['id'];
     title = json['title'];
     description = json['description'];
@@ -63,6 +101,7 @@ class News extends Article {
     thumbWidth = json['thumb_width'];
     thumbHeight = json['thumb_height'];
     apiGetContent = json['api_get_content'];
+    return this;
   }
 
   Map<String, dynamic> toJson() {
@@ -167,14 +206,14 @@ class News extends Article {
 
 class Images {
   String type;
-  Data data;
+  ContentData data;
   String align;
 
   Images({this.type, this.data, this.align});
 
   Images.fromJson(Map<String, dynamic> json) {
     type = json['type'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? new ContentData.fromJson(json['data']) : null;
     align = json['align'];
   }
 
@@ -185,28 +224,6 @@ class Images {
       data['data'] = this.data.toJson();
     }
     data['align'] = this.align;
-    return data;
-  }
-}
-
-class Data {
-  String content;
-  String width;
-  String height;
-
-  Data({this.content, this.width, this.height});
-
-  Data.fromJson(Map<String, dynamic> json) {
-    content = json['content'];
-    width = json['width'];
-    height = json['height'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['content'] = this.content;
-    data['width'] = this.width;
-    data['height'] = this.height;
     return data;
   }
 }
@@ -309,6 +326,56 @@ class Category {
     data['updated_at'] = this.updatedAt;
     data['deleted_at'] = this.deletedAt;
     data['api_get_content'] = this.apiGetContent;
+    return data;
+  }
+}
+
+
+class NewsContent {
+  String type;
+  ContentData data;
+  String align;
+
+  NewsContent({this.type, this.data, this.align});
+
+  NewsContent.fromJson(Map<String, dynamic> json) {
+    type = json['type'];
+    data = json['data'] != null ? new ContentData.fromJson(json['data']) : null;
+    align = json['align'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['type'] = this.type;
+    if (this.data != null) {
+      data['data'] = this.data.toJson();
+    }
+    data['align'] = this.align;
+    return data;
+  }
+}
+
+class ContentData {
+  String content;
+  String image;
+  String width;
+  String height;
+
+  ContentData({this.content, this.width, this.height});
+
+  ContentData.fromJson(Map<String, dynamic> json) {
+    content = json['content'];
+    image = json['image'];
+    width = json['width'];
+    height = json['height'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['content'] = this.content;
+    data['image'] = this.image;
+    data['width'] = this.width;
+    data['height'] = this.height;
     return data;
   }
 }

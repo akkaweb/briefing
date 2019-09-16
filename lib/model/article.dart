@@ -7,7 +7,7 @@ class Article {
   final String url;
   final String publishedAt;
   final String author;
-  final String source;
+  String source;
   final String content;
   final String imageUrl;
   final String category;

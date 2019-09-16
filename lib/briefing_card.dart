@@ -1,8 +1,12 @@
 import 'package:briefing/model/article.dart';
 import 'package:briefing/model/news.dart';
-import 'package:flutter/material.dart';
+import 'package:briefing/model/screen_argument.dart';
+import 'package:briefing/route/navigation_service.dart';
+import 'package:briefing/service/locator.dart';
 import 'package:briefing/widget/article_bottom_section.dart';
 import 'package:briefing/widget/article_title_section.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 
 class BriefingCard extends StatefulWidget {
@@ -17,6 +21,8 @@ class BriefingCard extends StatefulWidget {
 }
 
 class BriefingCardState extends State<BriefingCard> {
+  final NavigationService _navigationService = locator<NavigationService>();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -32,7 +38,11 @@ class BriefingCardState extends State<BriefingCard> {
                   borderRadius: BorderRadius.circular(0.0),
                   child: ArticleTitleSection(article: widget.article),
                   onTap: () {
-                    if (widget is News) {
+                    if (widget.article is News) {
+                      final News news = widget.article as News;
+                      _navigationService.navigateTo(Router.NewsDetail,
+                          arguments:
+                              new ScreenArgument(news.title, "${news.id}"));
                     } else
                       _launchURL(context, widget.article.url);
                   },
@@ -44,8 +54,8 @@ class BriefingCardState extends State<BriefingCard> {
               borderRadius: new BorderRadius.circular(5.0),
               child: (widget.article is News &&
                       (widget.article as News).hasImage == 1)
-                  ? Image(
-                      image: NetworkImage((widget.article as News).thumbUrl),
+                  ? CachedNetworkImage(
+                      imageUrl: (widget.article as News).thumbUrl,
                       width: 74,
                       height: 74,
                       fit: BoxFit.cover,

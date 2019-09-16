@@ -4,7 +4,6 @@ import 'package:briefing/bloc/bloc_article.dart';
 import 'package:briefing/briefing_card.dart';
 import 'package:briefing/model/article.dart';
 import 'package:briefing/model/news.dart';
-import 'package:briefing/model/news.dart' as cate;
 import 'package:flutter/material.dart';
 
 class NewsList extends StatefulWidget {
@@ -31,8 +30,7 @@ class _NewsListState extends State<NewsList> {
   }
 
   Future<void> _onRefresh() async {
-//    await _bloc.refresh()
-    await Future.delayed(Duration(seconds: 2));
+    await _bloc.refresh();
   }
 
   @override
@@ -54,31 +52,42 @@ class _NewsListState extends State<NewsList> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(0.0)),
                 elevation: 1.0,
-                child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 12.0),
-                    height: 30.0,
-                    width: MediaQuery.of(context).size.width,
-                    child: ListView(
-                      physics: ScrollPhysics(),
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      children: snapshot.data
-                          .map(
-                            (category) => Padding(
-                          padding:
-                          const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: ChoiceChip(
-                              selectedColor: Theme.of(context).accentColor,
-                              label: Text(category.name),
-                              selected: category.id == _bloc.categorySelected,
-                              onSelected: (val) {
-                                _refreshIndicatorKey.currentState.show();
-                                _bloc.categorySink.add(category.id);
-                              }),
-                        ),
-                      )
-                          .toList(),
-                    )));
+                child: snapshot.data.isEmpty
+                    ? Center(
+                        child: Container(
+                        margin: EdgeInsets.all(0.0),
+                        width: 30,
+                        height: 30,
+                        child: CircularProgressIndicator(),
+                      ))
+                    : Container(
+                        margin: EdgeInsets.symmetric(vertical: 12.0),
+                        height: 30.0,
+                        width: MediaQuery.of(context).size.width,
+                        child: ListView(
+                          physics: ScrollPhysics(),
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          children: snapshot.data
+                              .map(
+                                (category) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 4.0),
+                                  child: ChoiceChip(
+                                      selectedColor:
+                                          Theme.of(context).accentColor,
+                                      label: Text(category.name),
+                                      selected:
+                                          category.id == _bloc.categorySelected,
+                                      onSelected: (val) {
+                                        _refreshIndicatorKey.currentState
+                                            .show();
+                                        _bloc.categorySink.add(category.id);
+                                      }),
+                                ),
+                              )
+                              .toList(),
+                        )));
           },
         ),
         StreamBuilder<List<Article>>(

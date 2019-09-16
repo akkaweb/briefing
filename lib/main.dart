@@ -6,19 +6,25 @@ import 'package:briefing/theme/theme.dart';
 import 'package:briefing/widget/main_sliverappbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:briefing/base/base_stateless.dart';
+import 'package:briefing/service/locator.dart';
+import 'package:briefing/route/navigation_service.dart';
 
 void main() {
+  setupLocator();
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends BaseStateless {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Báo đây',
       theme: buildAppTheme(),
-      home: MyHomePage(title: 'Báo đây'),
+      navigatorKey: locator<NavigationService>().navigationKey,
+      onGenerateRoute: generateRouter,
+      initialRoute: Router.Home
     );
   }
 }

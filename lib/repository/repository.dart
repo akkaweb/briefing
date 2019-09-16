@@ -61,4 +61,8 @@ class RepositoryArticle {
   static Future<List<Category>> getAllCategory() async {
     return ApiService.getAllCategory();
   }
+
+  static Future<News> getNewsDetail(id) async {
+    return ApiService.getNewsDetail(id);
+  }
 }
