@@ -4,13 +4,13 @@ import 'package:briefing/bloc/bloc_provider.dart';
 import 'package:briefing/model/article.dart';
 import 'package:briefing/model/news.dart';
 import 'package:briefing/repository/repository.dart';
-import 'package:briefing/util/rate_limiter.dart';
+import 'package:briefing/util/pair.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ArticleListBloc extends BlocBase {
   final menuSubject = BehaviorSubject.seeded(Menu.local);
   final _newsListSubject = BehaviorSubject<List<News>>();
-  final _categoryListSubject = BehaviorSubject<List<Category>>();
+  final _categoryListSubject = BehaviorSubject<Pair<List<Category>, int>>();
   final _categorySubject = BehaviorSubject.seeded(0);
 
   List<News> _newsList = <News>[];
@@ -21,7 +21,8 @@ class ArticleListBloc extends BlocBase {
 
   Stream<List<News>> get newsListObservable => _newsListSubject.stream;
 
-  Stream<List<Category>> get categoryListObservable => _categoryListSubject.stream;
+  Stream<Pair<List<Category>, int>> get categoryListObservable =>
+      _categoryListSubject.stream;
 
   Stream<int> get categoryObservable => _categorySubject.stream;
 
@@ -29,7 +30,7 @@ class ArticleListBloc extends BlocBase {
 
   ArticleListBloc() {
     _newsListSubject.add(_newsList);
-    _categoryListSubject.add(_categoryList);
+    _categoryListSubject.add(Pair(_categoryList, categorySelected));
     categoryListener();
   }
 
@@ -37,6 +38,7 @@ class ArticleListBloc extends BlocBase {
     categoryObservable.listen((category) async {
       print('categoryObservable.listen($category)');
       categorySelected = category;
+      _categoryListSubject.add(Pair(_categoryList, categorySelected));
       await _fetchDataAndPushToStream(category: categorySelected);
     });
   }
@@ -55,7 +57,7 @@ class ArticleListBloc extends BlocBase {
   }
 
   sendNewsToStream(List<News> news, [bool isLoadMore = true]) {
-    if(!isLoadMore) {
+    if (!isLoadMore) {
       _newsList.clear();
     }
     _newsList.addAll(news);
@@ -71,18 +73,17 @@ class ArticleListBloc extends BlocBase {
   }
 
   Future<void> _fetchFromNetwork({country = 'us', category}) async {
-    var articles =
-        await RepositoryArticle.getLocalNewsFromNetwork(category);
-    sendNewsToStream(articles);
+    var articles = await RepositoryArticle.getLocalNewsFromNetwork(category);
+    sendNewsToStream(articles, false);
   }
 
   Future<void> _fetchCategory() async {
     var cates = await RepositoryArticle.getAllCategory();
     _categoryList.clear();
-    if(cates.isNotEmpty) {
+    if (cates.isNotEmpty) {
       _categoryList.addAll(cates);
     }
-    _categoryListSubject.sink.add(_categoryList);
+    _categoryListSubject.sink.add(Pair(_categoryList, categorySelected));
   }
 
   void sendErrorMessage([String message = "Can't connect to the internet!"]) {

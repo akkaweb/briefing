@@ -13,7 +13,7 @@ class DetailViewModel extends BaseModel {
 
   News get news => _news;
 
-  Future getDetail() async {
+  Future<void> getDetail() async {
     setBusy(true);
     _news = await RepositoryArticle.getNewsDetail(id);
     if (_news == null) {

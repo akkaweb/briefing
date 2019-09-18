@@ -1,11 +1,8 @@
-import 'dart:async';
-
-import 'package:briefing/bloc/bloc_article.dart';
-import 'package:briefing/briefing_card.dart';
-import 'package:briefing/model/article.dart';
 import 'package:flutter/material.dart';
 
 class VideoList extends StatefulWidget {
+  const VideoList({Key key}) : super(key: key);
+
   @override
   _VideoState createState() {
     return _VideoState();

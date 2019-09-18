@@ -39,6 +39,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   final menus = [Menu.local, Menu.headlines, Menu.favorites, Menu.agencies];
+  final NewsList newsScreen = NewsList(key: PageStorageKey("NewsList"), menu: Menu.local);
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final PageStorageBucket bucket = PageStorageBucket();
 
   @override
   Widget build(BuildContext context) {
@@ -64,13 +66,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
     Widget getScreen() {
       if (menus[_selectedIndex] == Menu.favorites) {
-        return BookmarkArticleList();
+        return BookmarkArticleList(key: PageStorageKey("Bookmark"),);
       }
       if (menus[_selectedIndex] == Menu.local) {
-        return NewsList(menu: menus[0]);
+//        if (newsScreen == null) {
+//          newsScreen =
+//              NewsList(key: PageStorageKey("NewsList"), menu: menus[0]);
+//        }
+        return newsScreen;
       }
       if (menus[_selectedIndex] == Menu.headlines) {
-        return VideoList();
+        return VideoList(key: PageStorageKey("VideoList"), );
       }
       return SliverList(
           delegate: SliverChildListDelegate([
@@ -97,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
         body: CustomScrollView(
           slivers: <Widget>[
             MainSliverAppBar(title: 'Báo Đây'),
-            getScreen(),
+            PageStorage(bucket: bucket, child: getScreen()),
           ],
         ),
         bottomNavigationBar: BottomAppBar(

@@ -5,6 +5,7 @@ import 'package:briefing/briefing_card.dart';
 import 'package:briefing/model/article.dart';
 import 'package:briefing/model/news.dart';
 import 'package:flutter/material.dart';
+import 'package:briefing/util/pair.dart';
 
 class NewsList extends StatefulWidget {
   final Menu menu;
@@ -18,6 +19,7 @@ class NewsList extends StatefulWidget {
 class _NewsListState extends State<NewsList> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
+
   ArticleListBloc _bloc;
 
   @override
@@ -43,19 +45,19 @@ class _NewsListState extends State<NewsList> {
   Widget build(BuildContext context) {
     return SliverList(
       delegate: SliverChildListDelegate([
-        StreamBuilder<List<Category>>(
+        StreamBuilder<Pair<List<Category>, int>>(
           stream: _bloc.categoryListObservable,
-          initialData: List(),
+          initialData: Pair(List(), _bloc.categorySelected),
           builder: (context, snapshot) {
             return Card(
                 margin: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(0.0)),
                 elevation: 1.0,
-                child: snapshot.data.isEmpty
+                child: snapshot.data.first.isEmpty
                     ? Center(
                         child: Container(
-                        margin: EdgeInsets.all(0.0),
+                        margin: EdgeInsets.all(5.0),
                         width: 30,
                         height: 30,
                         child: CircularProgressIndicator(),
@@ -68,7 +70,7 @@ class _NewsListState extends State<NewsList> {
                           physics: ScrollPhysics(),
                           shrinkWrap: true,
                           scrollDirection: Axis.horizontal,
-                          children: snapshot.data
+                          children: snapshot.data.first
                               .map(
                                 (category) => Padding(
                                   padding: const EdgeInsets.symmetric(
