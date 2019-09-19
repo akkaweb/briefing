@@ -6,137 +6,152 @@ import 'package:briefing/model/article.dart';
 import 'package:briefing/model/news.dart';
 import 'package:flutter/material.dart';
 import 'package:briefing/util/pair.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:briefing/viewmodels/news_viewmodel.dart';
+import 'package:briefing/base/keep_state.dart';
 
 class NewsList extends StatefulWidget {
-  final Menu menu;
-
-  const NewsList({Key key, this.menu}) : super(key: key);
+  const NewsList({Key key}) : super(key: key);
 
   @override
   _NewsListState createState() => _NewsListState();
 }
 
-class _NewsListState extends State<NewsList> {
+class _NewsListState extends KeepState<NewsList> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
-
-  ArticleListBloc _bloc;
+  NewsViewModel _viewModel = NewsViewModel();
 
   @override
   void initState() {
     super.initState();
-    _bloc = ArticleListBloc();
-    _bloc.getCategory();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
   }
 
   Future<void> _onRefresh() async {
-    await _bloc.refresh();
+    setState(() {
+      _refreshIndicatorKey.currentState.show();
+    });
+    await _viewModel.getNews(_viewModel.cateSelected, isRefresh: true);
   }
 
   @override
   void dispose() {
-    _bloc.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildListDelegate([
-        StreamBuilder<Pair<List<Category>, int>>(
-          stream: _bloc.categoryListObservable,
-          initialData: Pair(List(), _bloc.categorySelected),
-          builder: (context, snapshot) {
-            return Card(
-                margin: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(0.0)),
-                elevation: 1.0,
-                child: snapshot.data.first.isEmpty
-                    ? Center(
-                        child: Container(
-                        margin: EdgeInsets.all(5.0),
-                        width: 30,
-                        height: 30,
-                        child: CircularProgressIndicator(),
-                      ))
-                    : Container(
-                        margin: EdgeInsets.symmetric(vertical: 12.0),
-                        height: 30.0,
-                        width: MediaQuery.of(context).size.width,
-                        child: ListView(
-                          physics: ScrollPhysics(),
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          children: snapshot.data.first
-                              .map(
-                                (category) => Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 4.0),
-                                  child: ChoiceChip(
-                                      selectedColor:
-                                          Theme.of(context).accentColor,
-                                      label: Text(category.name),
-                                      selected:
-                                          category.id == _bloc.categorySelected,
-                                      onSelected: (val) {
-                                        _refreshIndicatorKey.currentState
-                                            .show();
-                                        _bloc.categorySink.add(category.id);
-                                      }),
-                                ),
-                              )
-                              .toList(),
-                        )));
-          },
-        ),
-        StreamBuilder<List<Article>>(
-            stream: _bloc.newsListObservable,
-            initialData: List(),
-            builder: (context, snapshot) {
-              debugPrint("!!!snapshot state: ${snapshot.connectionState}!!!");
-              return RefreshIndicator(
-                key: _refreshIndicatorKey,
-                displacement: 5.0,
-                backgroundColor: Colors.white,
-                onRefresh: _onRefresh,
-                child: snapshot.hasData && snapshot.data.length > 0
-                    ? ListView.separated(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 18.0),
-                        physics: ScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: snapshot.data.length,
-                        separatorBuilder: (BuildContext context, int index) {
-                          return Divider();
-                        },
-                        itemBuilder: (BuildContext context, int index) {
-                          return BriefingCard(
-                              article: snapshot.data.elementAt(index));
-                        },
-                      )
-                    : snapshot.hasError
-                        ? Center(
-                            child: GestureDetector(
-                              onTap: _onRefresh,
-                              child:
-                                  ErrorWidget(message: ['${snapshot.error}']),
-                            ),
-                          )
-                        : Center(
-                            child: Container(
-                              margin: EdgeInsets.all(16.0),
-                              width: 30,
-                              height: 30,
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-              );
-            }),
-      ]),
-    );
+    return RefreshIndicator(
+        key: _refreshIndicatorKey,
+        displacement: 5.0,
+        backgroundColor: Colors.white,
+        onRefresh: _onRefresh,
+        child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: new Container(
+                color: Colors.white,
+                child: ChangeNotifierProvider(
+                    builder: (context) => _viewModel,
+                    child: Consumer<NewsViewModel>(
+                        builder: (context, model, child) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Card(
+                                    margin: EdgeInsets.zero,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(0.0)),
+                                    elevation: 1.0,
+                                    child: (model.listCategories?.isNotEmpty !=
+                                            true)
+                                        ? Center(
+                                            child: Container(
+                                            margin: EdgeInsets.all(5.0),
+                                            width: 30,
+                                            height: 30,
+                                            child: CircularProgressIndicator(),
+                                          ))
+                                        : Container(
+                                            margin: EdgeInsets.symmetric(
+                                                vertical: 12.0),
+                                            height: 30.0,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            child: ListView(
+                                              physics: ScrollPhysics(),
+                                              shrinkWrap: true,
+                                              scrollDirection: Axis.horizontal,
+                                              children: (model.listCategories ??
+                                                      List())
+                                                  .map(
+                                                    (category) => Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 4.0),
+                                                      child: ChoiceChip(
+                                                          selectedColor:
+                                                              Theme.of(context)
+                                                                  .accentColor,
+                                                          label: Text(
+                                                              category.name),
+                                                          selected: category
+                                                                  .id ==
+                                                              model
+                                                                  .cateSelected,
+                                                          onSelected: (val) {
+                                                            _refreshIndicatorKey
+                                                                .currentState
+                                                                .show();
+                                                            model.getNews(
+                                                                category.id);
+                                                          }),
+                                                    ),
+                                                  )
+                                                  .toList(),
+                                            ))),
+                                model.listNews?.isNotEmpty == true
+                                    ? ListView.separated(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 12.0, vertical: 18.0),
+                                        physics: ScrollPhysics(),
+                                        shrinkWrap: true,
+                                        itemCount: model.listNews.length,
+                                        separatorBuilder:
+                                            (BuildContext context, int index) {
+                                          return Divider();
+                                        },
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return BriefingCard(
+                                              article: model.listNews
+                                                  .elementAt(index));
+                                        },
+                                      )
+                                    : model.hasErrorMessage
+                                        ? Center(
+                                            child: GestureDetector(
+                                              onTap: _onRefresh,
+                                              child: ErrorWidget(message: [
+                                                '${model.errorMessage}'
+                                              ]),
+                                            ),
+                                          )
+                                        : Center(
+                                            child: Container(
+                                              margin: EdgeInsets.all(16.0),
+                                              width: 30,
+                                              height: 30,
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
+                                          ),
+                              ],
+                            ))))));
   }
 }
 

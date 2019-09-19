@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:briefing/model/article.dart';
+import 'package:briefing/viewmodels/base_model.dart';
+import 'package:briefing/repository/repository.dart';
 
 class News extends Article {
   List<Images> images;
@@ -288,18 +290,20 @@ class Category {
   String updatedAt;
   Null deletedAt;
   String apiGetContent;
+  List<News> listNews;
+  int page = 0;
 
   Category(
       {this.id,
-        this.name,
-        this.view,
-        this.status,
-        this.iconPath,
-        this.iconUrl,
-        this.createdAt,
-        this.updatedAt,
-        this.deletedAt,
-        this.apiGetContent});
+      this.name,
+      this.view,
+      this.status,
+      this.iconPath,
+      this.iconUrl,
+      this.createdAt,
+      this.updatedAt,
+      this.deletedAt,
+      this.apiGetContent});
 
   Category.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -327,6 +331,16 @@ class Category {
     data['deleted_at'] = this.deletedAt;
     data['api_get_content'] = this.apiGetContent;
     return data;
+  }
+
+  Future<void> getNews({bool isLoadmore = false}) async {
+    if(!isLoadmore || page < 1) {
+      page = 1;
+    } else {
+      page += 1;
+    }
+    var news = await RepositoryArticle.getLocalNewsFromNetwork(id);
+    this.listNews = news;
   }
 }
 

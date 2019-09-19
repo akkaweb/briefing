@@ -9,6 +9,7 @@ import 'package:briefing/video_list.dart';
 import 'package:briefing/widget/main_sliverappbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:briefing/viewmodels/news_viewmodel.dart';
 
 void main() {
   setupLocator();
@@ -39,7 +40,26 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   final menus = [Menu.local, Menu.headlines, Menu.favorites, Menu.agencies];
-  final NewsList newsScreen = NewsList(key: PageStorageKey("NewsList"), menu: Menu.local);
+
+  PageStorage _getNewsScreen() {
+    if (_newsScreen == null) {
+      _newsScreen = PageStorage(
+          bucket: _bucket, child: NewsList(key: PageStorageKey("NewsList")));
+    }
+    return _newsScreen;
+  }
+
+  PageStorage _newsScreen;
+
+  PageStorage _getVideoScreen() {
+    if (_videoScreen == null) {
+      _videoScreen = PageStorage(
+          bucket: _bucket, child: NewsList(key: PageStorageKey("VideoScreen")));
+    }
+    return _videoScreen;
+  }
+
+  PageStorage _videoScreen;
 
   @override
   void initState() {
@@ -52,7 +72,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final PageStorageBucket bucket = PageStorageBucket();
+  static final PageStorageBucket _bucket = PageStorageBucket();
+  final PageController _pageController = PageController(keepPage: true);
 
   @override
   Widget build(BuildContext context) {
@@ -64,80 +85,51 @@ class _MyHomePageState extends State<MyHomePage> {
       systemNavigationBarIconBrightness: Brightness.dark,
     ));
 
-    Widget getScreen() {
-      if (menus[_selectedIndex] == Menu.favorites) {
-        return BookmarkArticleList(key: PageStorageKey("Bookmark"),);
-      }
-      if (menus[_selectedIndex] == Menu.local) {
-//        if (newsScreen == null) {
-//          newsScreen =
-//              NewsList(key: PageStorageKey("NewsList"), menu: menus[0]);
-//        }
-        return newsScreen;
-      }
-      if (menus[_selectedIndex] == Menu.headlines) {
-        return VideoList(key: PageStorageKey("VideoList"), );
-      }
-      return SliverList(
-          delegate: SliverChildListDelegate([
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 64.0),
-          child: Center(
-            child: Text('Agencies(sources) comming soon...',
-                style: TextStyle(fontSize: 22)),
-          ),
-        )
-      ]));
-    }
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light.copyWith(
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-        statusBarColor: Theme.of(context).primaryColor,
-        systemNavigationBarColor: Colors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
+    return DefaultTabController(
+      length: 4,
       child: Scaffold(
         key: _scaffoldKey,
-        body: CustomScrollView(
-          slivers: <Widget>[
-            MainSliverAppBar(title: 'Báo Đây'),
-            PageStorage(bucket: bucket, child: getScreen()),
+        body: PageView(
+          controller: _pageController,
+          onPageChanged: _pageChanged,
+          children: <Widget>[
+            _getNewsScreen(),
+            _getVideoScreen(),
+            BookmarkArticleList(
+              key: PageStorageKey("Bookmark"),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 64.0),
+              child: Center(
+                child: Text('Agencies(sources) comming soon...',
+                    style: TextStyle(fontSize: 22)),
+              ),
+            )
           ],
         ),
-        bottomNavigationBar: BottomAppBar(
-          color: Theme.of(context).primaryColor,
-          child: Container(
-            decoration: BoxDecoration(boxShadow: [
-              BoxShadow(
-                  color: Colors.grey[100],
-                  offset: Offset(-2.0, 2.0),
-                  blurRadius: 2.0,
-                  spreadRadius: 2.0)
-            ]),
-            height: 60.0,
-            child: BottomNavigationBar(
-              selectedItemColor: Theme.of(context).accentColor,
-              currentIndex: _selectedIndex,
-              onTap: (val) => _onItemTapped(val),
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Theme.of(context).primaryColor,
-              selectedFontSize: 14.0,
-              unselectedFontSize: 12.0,
-              items: [
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.library_books), title: Text('Tin tức')),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.personal_video), title: Text('Videos')),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.bookmark_border), title: Text('Đã lưu')),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.person), title: Text('Cài đặt'))
-              ],
-              elevation: 5.0,
-            ),
-          ),
+        appBar: AppBar(
+          title: Text("Báo Đây"),
+          elevation: 1,
+          centerTitle: true,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          selectedItemColor: Theme.of(context).accentColor,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Theme.of(context).primaryColor,
+          selectedFontSize: 14.0,
+          unselectedFontSize: 12.0,
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.library_books), title: Text('Tin tức')),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.personal_video), title: Text('Videos')),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.bookmark_border), title: Text('Đã lưu')),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.person), title: Text('Cài đặt'))
+          ],
         ),
       ),
     );
@@ -146,7 +138,14 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _pageController.animateToPage(index,
+          duration: Duration(milliseconds: 500), curve: Curves.ease);
     });
-//    Navigator.pop(context);
+  }
+
+  void _pageChanged(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 }
