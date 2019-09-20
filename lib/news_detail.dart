@@ -70,7 +70,7 @@ class _DetailPageState extends State<DetailPage> {
                   .subhead
                   .copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16),),
+                  fontSize: 18),),
               leading: IconButton(
                 icon: Icon(
                   Icons.arrow_back_ios,

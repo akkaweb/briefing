@@ -70,7 +70,7 @@ class _NewsListState extends KeepState<NewsList> {
                                             true)
                                         ? Center(
                                             child: Container(
-                                            margin: EdgeInsets.all(5.0),
+                                            margin: EdgeInsets.all(10.0),
                                             width: 30,
                                             height: 30,
                                             child: CircularProgressIndicator(),

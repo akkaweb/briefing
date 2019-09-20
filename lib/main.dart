@@ -2,14 +2,13 @@ import 'package:briefing/base/base_stateless.dart';
 import 'package:briefing/bookmarked_article_list.dart';
 import 'package:briefing/model/article.dart';
 import 'package:briefing/news_list.dart';
+import 'package:briefing/video_list.dart';
 import 'package:briefing/route/navigation_service.dart';
 import 'package:briefing/service/locator.dart';
 import 'package:briefing/theme/theme.dart';
-import 'package:briefing/video_list.dart';
-import 'package:briefing/widget/main_sliverappbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:briefing/viewmodels/news_viewmodel.dart';
+import 'package:briefing/base/keep_state.dart';
 
 void main() {
   setupLocator();
@@ -37,7 +36,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends KeepState<MyHomePage> {
   int _selectedIndex = 0;
   final menus = [Menu.local, Menu.headlines, Menu.favorites, Menu.agencies];
 
@@ -54,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   PageStorage _getVideoScreen() {
     if (_videoScreen == null) {
       _videoScreen = PageStorage(
-          bucket: _bucket, child: NewsList(key: PageStorageKey("VideoScreen")));
+          bucket: _bucket, child: VideoList(key: PageStorageKey("VideoScreen")));
     }
     return _videoScreen;
   }
@@ -85,7 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
       systemNavigationBarIconBrightness: Brightness.dark,
     ));
 
-    return DefaultTabController(
+    return PageStorage(
+      key: PageStorageKey("Main"),
+      bucket: _bucket,
+            child: DefaultTabController(
       length: 4,
       child: Scaffold(
         key: _scaffoldKey,
@@ -118,8 +120,9 @@ class _MyHomePageState extends State<MyHomePage> {
           selectedItemColor: Theme.of(context).accentColor,
           type: BottomNavigationBarType.fixed,
           backgroundColor: Theme.of(context).primaryColor,
-          selectedFontSize: 14.0,
-          unselectedFontSize: 12.0,
+          selectedFontSize: 12.0,
+          unselectedFontSize: 10.0,
+          iconSize: 20,
           items: [
             BottomNavigationBarItem(
                 icon: Icon(Icons.library_books), title: Text('Tin tức')),
@@ -132,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   void _onItemTapped(int index) {

@@ -28,32 +28,28 @@ class BriefingCardState extends State<BriefingCard> {
     return Container(
       margin: EdgeInsets.only(bottom: 4.0),
       padding: EdgeInsets.fromLTRB(4.0, 0.0, 4.0, 4.0),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Expanded(
-              child: Column(mainAxisSize: MainAxisSize.max, children: <Widget>[
-                InkWell(
-                  borderRadius: BorderRadius.circular(0.0),
-                  child: ArticleTitleSection(article: widget.article),
-                  onTap: () {
-                    if (widget.article is News) {
-                      final News news = widget.article as News;
-                      _navigationService.navigateTo(Router.NewsDetail,
-                          arguments:
-                              new ScreenArgument(news.title, "${news.id}"));
-                    } else
-                      _launchURL(context, widget.article.url);
-                  },
-                ),
-                ArticleBottomSection(article: widget.article),
-              ]),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max, children: <Widget>[
+        Expanded(
+          child: Column(mainAxisSize: MainAxisSize.max, children: <Widget>[
+            InkWell(
+              borderRadius: BorderRadius.circular(0.0),
+              child: ArticleTitleSection(article: widget.article),
+              onTap: () {
+                if (widget.article is News) {
+                  final News news = widget.article as News;
+                  _navigationService.navigateTo(Router.NewsDetail,
+                      arguments: new ScreenArgument(news.title, "${news.id}"));
+                } else
+                  _launchURL(context, widget.article.url);
+              },
             ),
-            ClipRRect(
-              borderRadius: new BorderRadius.circular(5.0),
-              child: (widget.article is News &&
-                      (widget.article as News).hasImage == 1)
+            ArticleBottomSection(article: widget.article),
+          ]),
+        ),
+        ClipRRect(
+            borderRadius: new BorderRadius.circular(5.0),
+            child: Stack(alignment: AlignmentDirectional.center, children: <Widget>[
+              (widget.article is News && (widget.article as News).hasImage == 1)
                   ? CachedNetworkImage(
                       imageUrl: (widget.article as News).thumbUrl,
                       width: 74,
@@ -65,8 +61,16 @@ class BriefingCardState extends State<BriefingCard> {
                       height: 74,
                       color: Theme.of(context).textSelectionColor,
                     ),
-            ),
-          ]),
+              (widget.article is News && (widget.article as News).hasVideo == 1)
+                  ? Center(
+                      child: Icon(
+                      Icons.play_circle_outline,
+                      color: Colors.white,
+                      size: 36,
+                    ))
+                  : Container()
+            ]))
+      ]),
     );
   }
 

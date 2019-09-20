@@ -15,6 +15,7 @@ class News extends Article {
   String thumbHeight;
   String apiGetContent;
   String thumbUrl;
+  String videoUrl;
   bool bookmarked = false;
   List<NewsContent> newContent;
 
@@ -72,6 +73,7 @@ class News extends Article {
       source = categoryNews.name ?? "";
     }
     date = json['date'];
+    videoUrl = json['video_url'];
     dateTime = json['datetime'];
     thumbUrl = json['thumb_url'];
     thumbWidth = json['thumb_width'];

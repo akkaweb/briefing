@@ -65,4 +65,8 @@ class RepositoryArticle {
   static Future<News> getNewsDetail(id) async {
     return ApiService.getNewsDetail(id);
   }
+
+  static Future<List<News>> getVideos({int page = 1}) async {
+    return ApiService.getVideos(page);
+  }
 }

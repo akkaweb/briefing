@@ -3,6 +3,7 @@ import 'package:briefing/service/locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
+import 'package:briefing/theme/theme.dart';
 
 class NewsVideoPlayer extends StatefulWidget {
   final String link;
@@ -48,19 +49,18 @@ class _NewsVideoPlayerState extends State<NewsVideoPlayer> {
   @override
   Widget build(BuildContext context) {
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light.copyWith(
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-      statusBarColor: Theme.of(context).primaryColor,
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ));
-
-    return MaterialApp(
-      title: 'Video',
-      home: Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        statusBarColor: Theme.of(context).primaryColor,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
+          centerTitle: true,
           title: Text(
             "Video",
             style: Theme.of(context)
@@ -81,17 +81,12 @@ class _NewsVideoPlayerState extends State<NewsVideoPlayer> {
         body: FutureBuilder(
             future: _initializeVideoPlayerFutre,
             builder: (content, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return AspectRatio(
+              return Center( child: (snapshot.connectionState == ConnectionState.done) ?
+                AspectRatio(
                   aspectRatio: _controller.value.aspectRatio,
                   child: VideoPlayer(_controller),
-                );
-              } else {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            }),
+                ) :
+                CircularProgressIndicator());}),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             setState(() {

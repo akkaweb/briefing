@@ -36,6 +36,11 @@ String getNewsUrl(int categoryId, int publisherId) {
   return url;
 }
 
+String getVideoUrl(int page) {
+  var url = 'https://vnnews.apptonghop.com/api/videos';
+  return url;
+}
+
 class ApiService {
   static Future<List<Article>> getArticlesFromNetwork(country, category) async {
     var articles = [];
@@ -57,6 +62,21 @@ class ApiService {
       if (response.statusCode == 200) {
         print(
             '=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
+        news = await compute(parseNews, response.body);
+      }
+    } catch (error) {
+      print('=== API::LocalNewsFromNetwork::Error ${error.toString()}');
+    }
+    return news;
+  }
+
+  static Future<List<News>> getVideos(page) async {
+    var news = [];
+    try {
+      final response = await http.get(getVideoUrl(page));
+      if (response.statusCode == 200) {
+        print(
+                '=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
         news = await compute(parseNews, response.body);
       }
     } catch (error) {

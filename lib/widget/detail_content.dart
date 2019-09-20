@@ -31,7 +31,7 @@ class DetailContent extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
-              Center(child: Icon(Icons.play_circle_outline))
+              Center(child: Icon(Icons.play_circle_outline, color: Colors.white, size: 72,))
             ],
           ));
     }
@@ -48,7 +48,7 @@ class DetailContent extends StatelessWidget {
       return Text(
         content.data.content,
         style: Theme.of(context).textTheme.body2.copyWith(
-              fontSize: 16,
+              fontSize: 17,
             ),
       );
     }
