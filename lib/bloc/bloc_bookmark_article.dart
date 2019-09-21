@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:briefing/bloc/bloc_provider.dart';
 import 'package:briefing/model/article.dart';
 import 'package:briefing/repository/repository.dart';
+import 'package:briefing/model/news.dart';
 import 'package:rxdart/rxdart.dart';
 
 class BookmarkArticleListBloc extends BlocBase {
-  final _articleListSubject = BehaviorSubject<List<Article>>();
-  List<Article> _articleList = <Article>[];
+  final _articleListSubject = BehaviorSubject<List<News>>();
+  List<News> _articleList = <News>[];
 
-  Stream<List<Article>> get articleListObservable => _articleListSubject.stream;
+  Stream<List<News>> get articleListObservable => _articleListSubject.stream;
 
   BookmarkArticleListBloc() {
     _articleListSubject.add(_articleList);
@@ -22,7 +23,7 @@ class BookmarkArticleListBloc extends BlocBase {
     await _loadBookmarkedArticlesFromDatabase();
   }
 
-  sendToStream(List<Article> articles) {
+  sendToStream(List<News> articles) {
     _articleList.clear();
     _articleList.addAll(articles);
     _articleListSubject.sink.add(_articleList);

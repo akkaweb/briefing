@@ -61,6 +61,12 @@ class DatabaseService {
     return res.isNotEmpty ? await compute(prepareNews, res) : [];
   }
 
+  Future<News> getNews(newsId) async {
+    final db = await database;
+    List<Map> res = await db.query("news", where: 'newsId = $newsId');
+    return res.isNotEmpty ? await compute(parseNews, res.first) : null;
+  }
+
   Future close() async => db.close();
 
 }
@@ -71,4 +77,8 @@ List<Article> prepareArticles(List<Map> list) {
 
 List<News> prepareNews(List<Map> list) {
   return list.map((a) => SaveNews.fromMap(a).news).toList();
+}
+
+News parseNews(Map map) {
+  return SaveNews.fromMap(map).news;
 }

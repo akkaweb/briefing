@@ -4,6 +4,7 @@ import 'package:briefing/bloc/bloc_bookmark_article.dart';
 import 'package:briefing/briefing_card.dart';
 import 'package:briefing/model/article.dart';
 import 'package:flutter/material.dart';
+import 'package:briefing/widget/news_widget.dart';
 
 class BookmarkArticleList extends StatefulWidget {
   const BookmarkArticleList({Key key}) : super(key: key);
@@ -13,16 +14,14 @@ class BookmarkArticleList extends StatefulWidget {
 }
 
 class _BookmarkArticleListState extends State<BookmarkArticleList> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-      new GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
   BookmarkArticleListBloc _bloc;
 
   @override
   void initState() {
     super.initState();
     _bloc = BookmarkArticleListBloc();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
   }
 
   Future<void> _onRefresh() async {
@@ -37,44 +36,36 @@ class _BookmarkArticleListState extends State<BookmarkArticleList> {
 
   @override
   Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildListDelegate([
-        StreamBuilder<List<Article>>(
-            stream: _bloc.articleListObservable,
-            initialData: List(),
-            builder: (context, snapshot) {
-              return RefreshIndicator(
-                key: _refreshIndicatorKey,
-                displacement: 5.0,
-                backgroundColor: Colors.white,
-                onRefresh: _onRefresh,
-                child: snapshot.hasData && snapshot.data.length > 0
-                    ? ListView.separated(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 18.0),
-                        physics: ScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: snapshot.data.length,
-                        separatorBuilder: (BuildContext context, int index) {
-                          return Divider();
-                        },
-                        itemBuilder: (BuildContext context, int index) {
-                          return BriefingCard(
-                              article: snapshot.data.elementAt(index));
-                        })
-                    : snapshot.hasError
-                        ? Center(
-                            child: ErrorWidget(message: ['${snapshot.error}']))
-                        : Center(
-                            child: Container(
-                                margin: EdgeInsets.all(16.0),
-                                width: 30,
-                                height: 30,
-                                child: CircularProgressIndicator()),
-                          ),
-              );
-            }),
-      ]),
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      color: Colors.white,
+      child: StreamBuilder<List<Article>>(
+          stream: _bloc.articleListObservable,
+          initialData: List(),
+          builder: (context, snapshot) {
+            return RefreshIndicator(
+              key: _refreshIndicatorKey,
+              displacement: 5.0,
+              backgroundColor: Colors.white,
+              onRefresh: _onRefresh,
+              child: snapshot.hasData && snapshot.data.length > 0
+                  ? ListView.separated(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 18.0),
+                      physics: ScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: snapshot.data.length,
+                      separatorBuilder: (BuildContext context, int index) {
+                        return Divider();
+                      },
+                      itemBuilder: (BuildContext context, int index) {
+                        return BriefingCard(article: snapshot.data.elementAt(index));
+                      })
+                  : snapshot.hasError
+                      ? Center(child: ErrorWidget(message: ['${snapshot.error}']))
+                      : LoadingView(),
+            );
+          }),
     );
   }
 }
@@ -92,15 +83,10 @@ class ErrorWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Icon(Icons.cloud_off, size: 55.0),
-          Text('Woops...',
-              style: Theme.of(context).textTheme.subhead,
-              textAlign: TextAlign.center),
+          Text('Woops...', style: Theme.of(context).textTheme.subhead, textAlign: TextAlign.center),
           Text(message.join('\n'),
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .subhead
-                  .copyWith(fontWeight: FontWeight.w600)),
+              style: Theme.of(context).textTheme.subhead.copyWith(fontWeight: FontWeight.w600)),
         ],
       ),
     );

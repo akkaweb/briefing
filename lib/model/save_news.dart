@@ -21,7 +21,7 @@ class SaveNews {
     }
 
     factory SaveNews.fromMap(Map<String, dynamic> map) {
-        News news = News.fromJson(map["newsJson"]);
+        News news = News.fromJson(json.decode(map["newsJson"]));
         return SaveNews(news);
     }
 

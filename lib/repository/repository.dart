@@ -16,6 +16,10 @@ class RepositoryArticle {
     return await DatabaseService.db.getReadNews();
   }
 
+  static Future<News> getNewsOffline(newsId) async {
+    return await DatabaseService.db.getNews(newsId);
+  }
+
   static Future<int> readNews(news) async {
     return await DatabaseService.db.insertNews(news);
   }

@@ -6,6 +6,7 @@ class DetailViewModel extends BaseModel {
   final String id;
 
   DetailViewModel(this.id) : super() {
+    getDetailOffline();
     getDetail();
     getListRelate();
   }
@@ -17,6 +18,15 @@ class DetailViewModel extends BaseModel {
   List<News> _listRelateNews;
 
   List<News> get listRelateNews => _listRelateNews;
+
+  Future<void> getDetailOffline() async {
+    News offlineNews = await RepositoryArticle.getNewsOffline(id);
+    if(offlineNews != null && busy) {
+      _news = offlineNews;
+      setBusy(false);
+      notifyListeners();
+    }
+  }
 
   Future<void> getDetail() async {
     setBusy(true);
