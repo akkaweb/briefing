@@ -9,6 +9,9 @@ import 'package:briefing/widget/detail_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:briefing/model/news.dart';
+import 'package:briefing/briefing_card.dart';
+import 'package:briefing/widget/news_widget.dart';
 
 void main() {
   runApp(Detail());
@@ -54,92 +57,118 @@ class _DetailPageState extends State<DetailPage> {
     return ChangeNotifierProvider(
       builder: (context) => DetailViewModel(widget.id),
       child: Consumer<DetailViewModel>(
-        builder: (context, model, child) =>
-            AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(
-            statusBarIconBrightness: Brightness.dark,
-            statusBarBrightness: Brightness.light,
-            statusBarColor: Theme.of(context).primaryColor,
-            systemNavigationBarColor: Colors.white,
-            systemNavigationBarIconBrightness: Brightness.dark,
-          ),
-              child: Scaffold(
-            appBar: AppBar(
-              title: Text(widget.title, style: Theme.of(context)
-                  .textTheme
-                  .subhead
-                  .copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18),),
-              leading: IconButton(
-                icon: Icon(
-                  Icons.arrow_back_ios,
-                  semanticLabel: 'back',
-                ),
-                onPressed: () {
-                  _navigationService.goBack();
-                },
-              ),
+        builder: (context, model, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(
+              statusBarIconBrightness: Brightness.dark,
+              statusBarBrightness: Brightness.light,
+              statusBarColor: Theme.of(context).primaryColor,
+              systemNavigationBarColor: Colors.white,
+              systemNavigationBarIconBrightness: Brightness.dark,
             ),
-            key: _scaffoldKey,
-            body: SingleChildScrollView(
-                padding: new EdgeInsets.all(16),
-                child: model.busy
-                    ? Center(
-                        child: Container(
-                          margin: EdgeInsets.all(16.0),
-                          width: 30,
-                          height: 30,
-                          child: CircularProgressIndicator(),
-                        ),
-                      )
-                    : (model.hasErrorMessage && model.news == null
-                        ? new Center(
-                            child: GestureDetector(
-                              child: list.ErrorWidget(
-                                  message: ['${model.errorMessage}']),
-                            ),
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                padding:
-                                    EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                                child: ListTile(
-                                  contentPadding:
-                                      EdgeInsets.symmetric(horizontal: 1.0),
-                                  title: Text(model.news?.title ?? "",
-                                      softWrap: true,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .subhead
-                                          .copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16)),
-                                ),
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  widget.title,
+                  style: Theme.of(context).textTheme.subhead.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                leading: IconButton(
+                  icon: Icon(
+                    Icons.arrow_back_ios,
+                    semanticLabel: 'back',
+                  ),
+                  onPressed: () {
+                    _navigationService.goBack();
+                  },
+                ),
+              ),
+              key: _scaffoldKey,
+              body: SingleChildScrollView(
+                  padding: new EdgeInsets.all(16),
+                  child: model.busy
+                      ? LoadingView()
+                      : (model.hasErrorMessage && model.news == null
+                          ? new Center(
+                              child: GestureDetector(
+                                child: list.ErrorWidget(message: ['${model.errorMessage}']),
                               ),
-                              ArticleBottomSection(article: model.news),
-                              ListView.separated(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 0.0, vertical: 16.0),
-                                physics: ScrollPhysics(),
-                                separatorBuilder: (BuildContext context, int index) {
-                                  return Divider(
-                                    color: Colors.white,
-                                  );
-                                },
-                                shrinkWrap: true,
-                                itemCount: model.news.newContent.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return DetailContent(
-                                      model.news.newContent[index]);
-                                },
-                              )
-                            ],
-                          ))),
-          )),
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Container(
+                                  padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                                  child: ListTile(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 1.0),
+                                    title: Text(model.news?.title ?? "",
+                                        softWrap: true,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subhead
+                                            .copyWith(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  ),
+                                ),
+                                ArticleBottomSection(article: model.news),
+                                ListView.separated(
+                                  padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 16.0),
+                                  physics: ScrollPhysics(),
+                                  separatorBuilder: (BuildContext context, int index) {
+                                    return Divider(
+                                      color: Colors.white,
+                                    );
+                                  },
+                                  shrinkWrap: true,
+                                  itemCount: model.news.newContent.length +
+                                      1 +
+                                      (model.isLoadRelate ? 1 : (model.listRelateNews?.length ?? 0)),
+                                  itemBuilder: (BuildContext context, int index) {
+                                    int contentLength = model.news.newContent.length;
+                                    if (index == contentLength) {
+                                      return TitleRelate("Tin liên quan");
+                                    } else
+                                    if (model.isLoadRelate && index == contentLength + 1) {
+                                      return LoadingView();
+                                    } else if (index > contentLength) {
+                                      News news = model.listRelateNews?.elementAt(index - contentLength - 1) ?? News();
+                                      return BriefingCard(
+                                        article: news,
+                                      );
+                                    } else
+                                      return DetailContent(model.news.newContent[index]);
+                                  },
+                                )
+                              ],
+                            ))),
+            )),
       ),
+    );
+  }
+}
+
+class TitleRelate extends StatelessWidget {
+
+  final String title;
+
+  TitleRelate(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        Text(
+          title,
+          style: Theme.of(context).textTheme.title.copyWith(color: Theme.of(context).accentColor),
+        ),
+        Expanded(
+          child: Container(
+            margin: EdgeInsets.only(bottom: 6),
+            height: 4,
+            color: Theme.of(context).accentColor,
+          ),
+        )
+      ],
     );
   }
 }

@@ -17,3 +17,17 @@ class TextBackgroundRadius extends StatelessWidget {
     );
   }
 }
+
+class LoadingView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: EdgeInsets.all(16.0),
+        width: 30,
+        height: 30,
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+}

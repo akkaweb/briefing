@@ -45,9 +45,6 @@ class _BottomSheetArticleMenuState extends State<BottomSheetArticleMenu> {
               setState(() {
                 widget.article.bookmarked = !widget.article.bookmarked;
               });
-
-              int id = await DatabaseService.db.updateArticle(widget.article);
-              print('Article $id updated');
               Navigator.of(context).pop();
             },
           ),

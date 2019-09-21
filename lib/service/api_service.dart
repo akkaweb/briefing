@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'package:xml/xml.dart';
+import 'package:briefing/model/response.dart';
 
 const base_url = 'https://newsapi.org/v2';
 const api_key = '11cd66d3a6994c108e7fb7d92cee5e12';
@@ -55,13 +56,12 @@ class ApiService {
     return articles;
   }
 
-  static Future<List<News>> getLocalNewsFromNetwork(category) async {
-    var news = [];
+  static Future<Response<List<News>>> getLocalNewsFromNetwork(category) async {
+    Response<List<News>> news;
     try {
       final response = await http.get(getNewsUrl(category, 0));
       if (response.statusCode == 200) {
-        print(
-            '=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
+        print('=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
         news = await compute(parseNews, response.body);
       }
     } catch (error) {
@@ -70,14 +70,41 @@ class ApiService {
     return news;
   }
 
-  static Future<List<News>> getVideos(page) async {
-    var news = [];
+  static Future<Response<List<News>>> getNewsFromNextPage(nextPage) async {
+    Response<List<News>> news;
+    try {
+      final response = await http.get(nextPage);
+      if (response.statusCode == 200) {
+        print('=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
+        news = await compute(parseNews, response.body);
+      }
+    } catch (error) {
+      print('=== API::LocalNewsFromNetwork::Error ${error.toString()}');
+    }
+    return news;
+  }
+
+  static Future<Response<List<News>>> getVideos(page) async {
+    Response<List<News>> news;
     try {
       final response = await http.get(getVideoUrl(page));
       if (response.statusCode == 200) {
-        print(
-                '=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
+        print('=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
         news = await compute(parseNews, response.body);
+      }
+    } catch (error) {
+      print('=== API::LocalNewsFromNetwork::Error ${error.toString()}');
+    }
+    return news;
+  }
+
+  static Future<List<News>> getRelateNews(newsId) async {
+    List<News> news;
+    try {
+      final response = await http.get("http://vnnews.apptonghop.com/api/articles/relate/$newsId");
+      if (response.statusCode == 200) {
+        print('=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
+        news = await compute(parseRelateNews, response.body);
       }
     } catch (error) {
       print('=== API::LocalNewsFromNetwork::Error ${error.toString()}');
@@ -90,8 +117,7 @@ class ApiService {
     try {
       final response = await http.get(category_url);
       if (response.statusCode == 200) {
-        print(
-            '=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
+        print('=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
         categories = await compute(parseCategory, response.body);
       }
     } catch (error) {
@@ -104,8 +130,7 @@ class ApiService {
     try {
       final response = await http.get("$news_detail_url$id");
       if (response.statusCode == 200) {
-        print(
-            '=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
+        print('=== API::LocalNewsFromNetwork::Response ${response.body.toString()}');
         return parseNewsDetail(response.body);
       }
     } catch (error) {
@@ -115,12 +140,22 @@ class ApiService {
   }
 }
 
-List<News> parseNews(String responseBody) {
+Response<List<News>> parseNews(String responseBody) {
   var articles = [];
   final parsed = json.decode(responseBody);
   if (parsed['code'] == 200) {
-    articles = List<News>.from(
-        parsed['data'].map((article) => News.fromJson(article)));
+    articles = List<News>.from(parsed['data'].map((article) => News.fromJson(article)));
+  }
+  final response = Response<List<News>>.getMeta(parsed);
+  response.data = articles;
+  return response;
+}
+
+List<News> parseRelateNews(String responseBody) {
+  var articles = [];
+  final parsed = json.decode(responseBody);
+  if (parsed['code'] == 200) {
+    articles = List<News>.from(parsed['data']['relate_article'].map((article) => News.fromJson(article)));
   }
   return articles;
 }
@@ -137,8 +172,7 @@ List<cate.Category> parseCategory(String responseBody) {
   var articles = [];
   final parsed = json.decode(responseBody);
   if (parsed['code'] == 200) {
-    articles = List<cate.Category>.from(
-        parsed['data'].map((article) => cate.Category.fromJson(article)));
+    articles = List<cate.Category>.from(parsed['data'].map((article) => cate.Category.fromJson(article)));
   }
   return articles;
 }
@@ -147,47 +181,7 @@ List<Article> parseArticles(String responseBody) {
   var articles = [];
   final parsed = json.decode(responseBody);
   if (parsed['totalResults'] > 0) {
-    articles = List<Article>.from(parsed['articles']
-        .map((article) => Article.fromMap(article, network: true)));
+    articles = List<Article>.from(parsed['articles'].map((article) => Article.fromMap(article, network: true)));
   }
   return articles;
-}
-
-List<Article> parseArticlesXml(String responseBody) {
-  var document = xml.parse(responseBody);
-
-  var channelElement = document.findAllElements("channel")?.first;
-  var source = findElementOrNull(channelElement, 'title')?.text;
-
-  return channelElement.findAllElements('item').map((element) {
-    var title = findElementOrNull(element, 'title')?.text;
-    var description = findElementOrNull(element, "description")?.text;
-    var source2 = element.findElements("source").first.getAttribute('url');
-    var link = findElementOrNull(element, "link")?.text;
-//    var category =
-//        element.findElements("category").first.getAttribute('domain');
-    var pubDate = findElementOrNull(element, "pubDate")?.text;
-    var author = findElementOrNull(element, "author")?.text;
-    var image =
-        findElementOrNull(element, "enclosure")?.getAttribute("url") ?? null;
-
-    return Article(
-        title: title,
-        category: 'local',
-        author: author,
-        content: description,
-        imageUrl: image,
-        publishedAt: pubDate,
-        url: link,
-        source: source2?.replaceAll('https://www.', '') ?? '',
-        description: description);
-  }).toList();
-}
-
-XmlElement findElementOrNull(XmlElement element, String name) {
-  try {
-    return element.findAllElements(name).first;
-  } on StateError {
-    return null;
-  }
 }

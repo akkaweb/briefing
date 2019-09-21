@@ -2,50 +2,22 @@ import 'package:briefing/model/article.dart';
 import 'package:briefing/model/news.dart';
 import 'package:briefing/service/api_service.dart';
 import 'package:briefing/service/database/database.dart';
+import 'package:briefing/model/response.dart';
 
 class RepositoryCommon {
   static close() {
     DatabaseService.db.close();
   }
-
-  static Future<int> getValue(String id) async {
-    return await DatabaseService.db.getValue(id);
-  }
-
-  static Future<int> insertMetadata(String id) async {
-    return await DatabaseService.db.insertMetadata(id);
-  }
-
-  static Future deleteMetadata(String id) async {
-    return await DatabaseService.db.deleteMetadata(id);
-  }
 }
 
 class RepositoryArticle {
-  //DatabaseService
-  static Future<void> insertArticle(Article article) async {
-    return await DatabaseService.db.insertArticle(article);
+
+  static Future<List<News>> getReadNews() async {
+    return await DatabaseService.db.getReadNews();
   }
 
-  static Future<void> insertArticleList(List<Article> articles,
-      {category}) async {
-    return await DatabaseService.db
-        .insertArticleList(articles, category: category);
-  }
-
-  static Future<List<Article>> getBookmarkedArticles() async {
-    return await DatabaseService.db.getBookmarkedArticles();
-  }
-
-  static Future<List<Article>> _getArticleFromDatabase() async {
-    return await DatabaseService.db.getAllArticle();
-  }
-
-  static Future<List<Article>> getAllArticleByCategory(String category) async {
-    if (category != null && category.isNotEmpty) {
-      return await DatabaseService.db.getAllArticleByCategory(category);
-    }
-    return await _getArticleFromDatabase();
+  static Future<int> readNews(news) async {
+    return await DatabaseService.db.insertNews(news);
   }
 
   //ApiService
@@ -54,8 +26,12 @@ class RepositoryArticle {
     return ApiService.getArticlesFromNetwork(country, category);
   }
 
-  static Future<List<News>> getLocalNewsFromNetwork(category) async {
+  static Future<Response<List<News>>> getLocalNewsFromNetwork(category) async {
     return ApiService.getLocalNewsFromNetwork(category);
+  }
+
+  static Future<Response<List<News>>> getNewsFromNextPage(nextPage) async {
+    return ApiService.getNewsFromNextPage(nextPage);
   }
 
   static Future<List<Category>> getAllCategory() async {
@@ -66,7 +42,11 @@ class RepositoryArticle {
     return ApiService.getNewsDetail(id);
   }
 
-  static Future<List<News>> getVideos({int page = 1}) async {
+  static Future<Response<List<News>>> getVideos({int page = 1}) async {
     return ApiService.getVideos(page);
+  }
+
+  static Future<List<News>> getRelateNews(newsId) async {
+    return ApiService.getRelateNews(newsId);
   }
 }

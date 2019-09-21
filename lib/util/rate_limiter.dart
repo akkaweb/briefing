@@ -16,32 +16,6 @@ class RateLimiter {
   }
 
   RateLimiter._internal([this._timeout = 2]);
-
-  Future<bool> shouldFetch(String key) async {
-    int lastFetched = await RepositoryCommon.getValue(key);
-//    print('lastFetched $lastFetched');
-    var now = DateTime.now();
-//    print('now ${now.millisecondsSinceEpoch}');
-    if (lastFetched == 0) {
-//      print('shouldFetch yes lastFetched == null');
-      await RepositoryCommon.insertMetadata(key);
-      return true;
-    }
-
-    if (now.millisecondsSinceEpoch - lastFetched >
-        Duration(minutes: _timeout).inMilliseconds) {
-//      print('shouldFetch yes timeout');
-      await RepositoryCommon.insertMetadata(key);
-      return true;
-    }
-
-//    print('shouldFetch false');
-    return false;
-  }
-
-  Future<int> reset(String key) async {
-    return await RepositoryCommon.deleteMetadata(key);
-  }
 }
 
 RateLimiter getRateLimiter = RateLimiter();

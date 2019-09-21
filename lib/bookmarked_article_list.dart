@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:briefing/bloc/bloc_article.dart';
 import 'package:briefing/bloc/bloc_bookmark_article.dart';
 import 'package:briefing/briefing_card.dart';
 import 'package:briefing/model/article.dart';

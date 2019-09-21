@@ -18,11 +18,13 @@ class NewsViewModel extends BaseModel {
 
   List<News> get listNews => _listNews;
 
+  bool get canLoadmore => _getCurrentCate()?.nextPage?.isNotEmpty == true;
+
   Future<void> fetchCategory() async {
     setBusy(true);
     var cates = await RepositoryArticle.getAllCategory();
     _listCategories.clear();
-    if (cates.isNotEmpty) {
+    if (cates?.isNotEmpty == true) {
       _listCategories.addAll(cates);
       _cateSelected = _listCategories[0].id;
       await getNews(_cateSelected);
@@ -37,6 +39,8 @@ class NewsViewModel extends BaseModel {
     _cateSelected = id;
     if(_getCurrentCate()?.listNews?.isNotEmpty != true || isRefresh) {
       await _getCurrentCate()?.getNews();
+    } else if(isLoadmore) {
+      await _getCurrentCate()?.getNews(isLoadmore: true);
     }
     _listNews = _getCurrentCate()?.listNews;
     notifyListeners();

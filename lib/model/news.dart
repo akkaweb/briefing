@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:briefing/model/article.dart';
 import 'package:briefing/viewmodels/base_model.dart';
 import 'package:briefing/repository/repository.dart';
+import 'package:briefing/model/response.dart';
 
 class News extends Article {
   List<Images> images;
@@ -20,7 +21,7 @@ class News extends Article {
   List<NewsContent> newContent;
 
   News(
-  {id,
+      {id,
       title,
       description,
       url,
@@ -30,11 +31,11 @@ class News extends Article {
       content,
       imageUrl,
       category,
-    this.images,
+      this.images,
       this.hasVideo,
       this.hasImage,
-    this.publisher,
-    this.categoryNews,
+      this.publisher,
+      this.categoryNews,
       this.date,
       this.dateTime,
       this.thumbWidth,
@@ -42,7 +43,7 @@ class News extends Article {
       this.apiGetContent,
       this.thumbUrl,
       this.bookmarked,
-  this.newContent});
+      this.newContent});
 
   News.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -56,12 +57,8 @@ class News extends Article {
     }
     hasImage = json['has_image'];
     hasVideo = json['has_video'];
-    publisher = json['publisher'] != null
-        ? new Publisher.fromJson(json['publisher'])
-        : null;
-    categoryNews = json['category'] != null
-        ? new Category.fromJson(json['category'])
-        : null;
+    publisher = json['publisher'] != null ? new Publisher.fromJson(json['publisher']) : null;
+    categoryNews = json['category'] != null ? new Category.fromJson(json['category']) : null;
 
     if (json['content'] != null) {
       newContent = new List<NewsContent>();
@@ -69,7 +66,7 @@ class News extends Article {
         newContent.add(new NewsContent.fromJson(v));
       });
     }
-    if(categoryNews != null) {
+    if (categoryNews != null) {
       source = categoryNews.name ?? "";
     }
     date = json['date'];
@@ -79,33 +76,6 @@ class News extends Article {
     thumbWidth = json['thumb_width'];
     thumbHeight = json['thumb_height'];
     apiGetContent = json['api_get_content'];
-  }
-
-  News fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    title = json['title'];
-    description = json['description'];
-    if (json['images'] != null) {
-      images = new List<Images>();
-      json['images'].forEach((v) {
-        images.add(new Images.fromJson(v));
-      });
-    }
-    hasImage = json['has_image'];
-    hasVideo = json['has_video'];
-    publisher = json['publisher'] != null
-        ? new Publisher.fromJson(json['publisher'])
-        : null;
-    categoryNews = json['category'] != null
-        ? new Category.fromJson(json['category'])
-        : null;
-    date = json['date'];
-    dateTime = json['datetime'];
-    thumbUrl = json['thumb_url'];
-    thumbWidth = json['thumb_width'];
-    thumbHeight = json['thumb_height'];
-    apiGetContent = json['api_get_content'];
-    return this;
   }
 
   Map<String, dynamic> toJson() {
@@ -124,9 +94,14 @@ class News extends Article {
     if (this.categoryNews != null) {
       data['category'] = this.categoryNews.toJson();
     }
+
+    if (this.newContent != null) {
+      data['content'] = this.newContent.map((v) => v.toJson()).toList();
+    }
     data['date'] = this.date;
     data['datetime'] = this.dateTime;
     data['thumb_url'] = this.thumbUrl;
+    data['video_url'] = this.videoUrl;
     data['thumb_width'] = this.thumbWidth;
     data['thumb_height'] = this.thumbHeight;
     data['api_get_content'] = this.apiGetContent;
@@ -165,8 +140,7 @@ class News extends Article {
       parsedDate = formatter.parse(dateTime);
     } catch (error) {
       try {
-        parsedDate =
-            DateFormat("EEE, d MMM yyyy HH:mm:ss zzz").parse(dateTime);
+        parsedDate = DateFormat("EEE, d MMM yyyy HH:mm:ss zzz").parse(dateTime);
       } catch (error) {
         print('${error.toString()}');
       }
@@ -174,23 +148,17 @@ class News extends Article {
     if (parsedDate != null) {
       Duration duration = DateTime.now().difference(parsedDate);
 
-      if (duration.inDays > 7 || duration.isNegative) {
+      if (duration.inDays > 7) {
         return DateFormat.MMMMd().format(parsedDate);
       } else if (duration.inDays >= 1 && duration.inDays <= 7) {
-        return duration.inDays == 1
-            ? "1 ngày trước"
-            : "${duration.inDays} ngày trước";
+        return duration.inDays == 1 ? "1 ngày" : "${duration.inDays} ngày";
       } else if (duration.inHours >= 1) {
-        return duration.inHours == 1
-            ? "1 giờ trước"
-            : "${duration.inHours} giờ trước";
+        return duration.inHours == 1 ? "1 giờ" : "${duration.inHours} giờ";
       } else {
-        return duration.inMinutes == 1
-            ? "1 phút trước"
-            : "${duration.inMinutes} phút trước";
+        return duration.inMinutes <= 1 ? "1 phút" : "${duration.inMinutes} phút";
       }
     } else {
-      return publishedAt;
+      return "";
     }
   }
 
@@ -245,14 +213,14 @@ class Publisher {
 
   Publisher(
       {this.id,
-        this.name,
-        this.view,
-        this.status,
-        this.iconPath,
-        this.iconUrl,
-        this.createdAt,
-        this.updatedAt,
-        this.deletedAt});
+      this.name,
+      this.view,
+      this.status,
+      this.iconPath,
+      this.iconUrl,
+      this.createdAt,
+      this.updatedAt,
+      this.deletedAt});
 
   Publisher.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -293,7 +261,7 @@ class Category {
   Null deletedAt;
   String apiGetContent;
   List<News> listNews;
-  int page = 0;
+  String nextPage;
 
   Category(
       {this.id,
@@ -336,16 +304,20 @@ class Category {
   }
 
   Future<void> getNews({bool isLoadmore = false}) async {
-    if(!isLoadmore || page < 1) {
-      page = 1;
+    Response<List<News>> news;
+    if (isLoadmore && nextPage?.isNotEmpty == true && listNews?.isNotEmpty == true) {
+      news = await RepositoryArticle.getNewsFromNextPage(nextPage);
+      if (news.data?.isNotEmpty == true) {
+        this.listNews?.addAll(news.data);
+      }
     } else {
-      page += 1;
+      nextPage = null;
+      news = await RepositoryArticle.getLocalNewsFromNetwork(id);
+      this.listNews = news.data;
     }
-    var news = await RepositoryArticle.getLocalNewsFromNetwork(id);
-    this.listNews = news;
+    nextPage = news?.meta?.nextPage;
   }
 }
-
 
 class NewsContent {
   String type;

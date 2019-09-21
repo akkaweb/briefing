@@ -35,7 +35,7 @@ class BookmarkArticleListBloc extends BlocBase {
 
   Future<void> _loadBookmarkedArticlesFromDatabase() async {
     try {
-      var localData = await RepositoryArticle.getBookmarkedArticles();
+      var localData = await RepositoryArticle.getReadNews();
       if (localData.isNotEmpty) {
         sendToStream(localData);
       } else {

@@ -49,35 +49,44 @@ class _NewsVideoPlayerState extends State<NewsVideoPlayer> {
   @override
   Widget build(BuildContext context) {
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
+    return Theme(
+            data: Theme.of(context).copyWith(
+        // Set the transparency here
+                backgroundColor: Colors.black54,
+        scaffoldBackgroundColor: Colors.black54,
+        dialogBackgroundColor: Colors.black54,
+        canvasColor: Colors.black54, //or any other color you want. e.g Colors.blue.withOpacity(0.5)
+    ), child: AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-        statusBarColor: Theme.of(context).primaryColor,
-        systemNavigationBarColor: Colors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        statusBarColor: Colors.black54,
+        systemNavigationBarColor: Colors.black54,
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.transparent,
           centerTitle: true,
           title: Text(
             "Video",
             style: Theme.of(context)
                 .textTheme
                 .subhead
-                .copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+                .copyWith(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
           ),
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios,
               semanticLabel: 'back',
+              color: Colors.white,
             ),
             onPressed: () {
               _navigationService.goBack();
             },
           ),
         ),
+        backgroundColor: Colors.black54,
         body: FutureBuilder(
             future: _initializeVideoPlayerFutre,
             builder: (content, snapshot) {
@@ -99,10 +108,11 @@ class _NewsVideoPlayerState extends State<NewsVideoPlayer> {
             _controller.value.isPlaying
                 ? Icons.pause
                 : Icons.play_circle_outline,
+            color: Colors.white,
           ),
         ),
       ),
-    );
+    ));
   }
 
   @override
