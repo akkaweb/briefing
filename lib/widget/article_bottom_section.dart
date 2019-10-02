@@ -3,11 +3,15 @@ import 'package:briefing/model/news.dart';
 import 'package:briefing/widget/article_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:briefing/widget/news_widget.dart';
+import 'package:briefing/route/navigation_service.dart';
+import 'package:briefing/service/locator.dart';
 
 class ArticleBottomSection extends StatelessWidget {
   final Article article;
 
-  const ArticleBottomSection({Key key, @required this.article}) : super(key: key);
+  ArticleBottomSection({Key key, @required this.article}) : super(key: key);
+
+  final NavigationService _navigationService = locator<NavigationService>();
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +33,8 @@ class ArticleBottomSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Row(children: <Widget>[
-                TextBackgroundRadius(
+                InkWell(
+                child: TextBackgroundRadius(
                   Text(
                     ((article is News) ? (article as News).categoryNews.name : article.source) ?? "",
                     maxLines: 1,
@@ -38,6 +43,9 @@ class ArticleBottomSection extends StatelessWidget {
                   radius: 20,
                   color: Theme.of(context).accentColor,
                 ),
+                onTap: () {
+                  _navigationService.navigateTo(Router.NewsByCategory, arguments: (article as News).categoryNews);
+                },),
               ]),
               Container(
                   margin: const EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 0.0),

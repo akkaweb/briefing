@@ -4,8 +4,13 @@ import 'package:briefing/repository/repository.dart';
 
 class NewsViewModel extends BaseModel {
 
-  NewsViewModel(): super() {
-    fetchCategory();
+  NewsViewModel({isNeedLoadCategory = true, id = -1}): super() {
+    if(isNeedLoadCategory) {
+      fetchCategory();
+    }
+    if(id > 0) {
+      getNews(id, isRefresh: true);
+    }
   }
 
   int _cateSelected = 0;

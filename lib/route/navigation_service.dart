@@ -3,6 +3,8 @@ import 'package:briefing/model/screen_argument.dart';
 import 'package:briefing/news_detail.dart';
 import 'package:briefing/news_video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:briefing/news_by_category.dart';
+import 'package:briefing/model/news.dart';
 
 class NavigationService {
   final GlobalKey<NavigatorState> navigationKey =
@@ -21,6 +23,7 @@ class NavigationService {
 class Router {
   static const String Home = "Home";
   static const String NewsDetail = "NewsDetail";
+  static const String NewsByCategory = "NewsByCategory";
   static const String NewsVideoDetail = "NewsVideoDetail";
   static const String SetupCategory = "SetupCategory";
   static const String SetupPublisher = "SetupPublisher";
@@ -40,6 +43,11 @@ Route<dynamic> generateRouter(RouteSettings settings) {
       var arguments = settings.arguments as ScreenArgument;
       return TransparentRoute(
           builder: (context) => NewsVideoPlayer(arguments.data),
+      settings: settings);
+      case Router.NewsByCategory:
+      var arguments = settings.arguments as Category;
+      return TransparentRoute(
+          builder: (context) => NewsByCategoryPage(arguments.id, isCategory: true, title: arguments.name,),
       settings: settings);
     default:
       return MaterialPageRoute(
