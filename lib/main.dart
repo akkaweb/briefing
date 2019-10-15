@@ -3,6 +3,8 @@ import 'package:briefing/bookmarked_article_list.dart';
 import 'package:briefing/model/article.dart';
 import 'package:briefing/news_list.dart';
 import 'package:briefing/video_list.dart';
+import 'package:briefing/tv_list.dart';
+import 'package:briefing/schedule.dart';
 import 'package:briefing/route/navigation_service.dart';
 import 'package:briefing/service/locator.dart';
 import 'package:briefing/theme/theme.dart';
@@ -60,6 +62,16 @@ class _MyHomePageState extends KeepState<MyHomePage> {
 
   PageStorage _videoScreen;
 
+  PageStorage _getLiveScreen() {
+    if (_liveScreen == null) {
+      _liveScreen = PageStorage(
+          bucket: _bucket, child: ScheduleScreen(key: PageStorageKey("LiveScreen")));
+    }
+    return _liveScreen;
+  }
+
+  PageStorage _liveScreen;
+
   @override
   void initState() {
     super.initState();
@@ -100,13 +112,7 @@ class _MyHomePageState extends KeepState<MyHomePage> {
             BookmarkArticleList(
               key: PageStorageKey("Bookmark"),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 64.0),
-              child: Center(
-                child: Text('Agencies(sources) comming soon...',
-                    style: TextStyle(fontSize: 22)),
-              ),
-            )
+            _getLiveScreen()
           ],
         ),
         appBar: AppBar(
@@ -131,7 +137,7 @@ class _MyHomePageState extends KeepState<MyHomePage> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.bookmark_border), title: Text('Đã lưu')),
             BottomNavigationBarItem(
-                icon: Icon(Icons.person), title: Text('Cài đặt'))
+                icon: Icon(Icons.person), title: Text('Live TV'))
           ],
         ),
       ),
