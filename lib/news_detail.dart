@@ -1,4 +1,6 @@
 import 'package:briefing/base/base_stateless.dart';
+import 'package:briefing/briefing_card.dart';
+import 'package:briefing/model/news.dart';
 import 'package:briefing/news_list.dart' as list;
 import 'package:briefing/route/navigation_service.dart';
 import 'package:briefing/service/locator.dart';
@@ -6,12 +8,10 @@ import 'package:briefing/theme/theme.dart';
 import 'package:briefing/viewmodels/detail_viewmodel.dart';
 import 'package:briefing/widget/article_bottom_section.dart';
 import 'package:briefing/widget/detail_content.dart';
+import 'package:briefing/widget/news_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:briefing/model/news.dart';
-import 'package:briefing/briefing_card.dart';
-import 'package:briefing/widget/news_widget.dart';
 
 void main() {
   runApp(Detail());
@@ -93,7 +93,7 @@ class _DetailPageState extends State<DetailPage> {
                               ),
                             )
                           : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 Container(
                                   padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),

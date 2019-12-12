@@ -6,12 +6,14 @@ import 'package:briefing/service/locator.dart';
 import 'package:briefing/widget/article_bottom_section.dart';
 import 'package:briefing/widget/article_title_section.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 
 class VideoCard extends StatefulWidget {
   final News article;
+  final bool isPlaying;
 
-  const VideoCard({Key key, this.article}) : super(key: key);
+  const VideoCard({Key key, this.article, this.isPlaying = false}) : super(key: key);
 
   @override
   VideoCardState createState() {
@@ -21,9 +23,42 @@ class VideoCard extends StatefulWidget {
 
 class VideoCardState extends State<VideoCard> {
   final NavigationService _navigationService = locator<NavigationService>();
+  VideoPlayerController _controller;
+
+  Future<void> _initializeVideoPlayerFutre;
+  int numberRetry = 0;
+
+  void _setupController() {
+    print("setup Controller");
+    _controller = VideoPlayerController.network(widget.article.videoUrl);
+    _initializeVideoPlayerFutre = _controller.initialize().then((_) {
+      print("Inited");
+      _controller.play();
+    }).catchError((error) {
+      print(error);
+    });
+  }
+
+  @override
+  void initState() {
+    print("isPlaying ${widget.isPlaying}");
+    if(widget.isPlaying) {
+      _setupController();
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if(widget.isPlaying && _controller == null) {
+      _setupController();
+    }
     return Container(
       width: MediaQuery.of(context).size.width,
       child: InkWell(
@@ -40,7 +75,15 @@ class VideoCardState extends State<VideoCard> {
                     children: <Widget>[
                       AspectRatio(
                         aspectRatio: 3 / 2.0,
-                        child: CachedNetworkImage(
+                        child: widget.isPlaying ? FutureBuilder(
+                            future: _initializeVideoPlayerFutre,
+                            builder: (content, snapshot) {
+                              return Center( child: (snapshot.connectionState == ConnectionState.done) ?
+                              AspectRatio(
+                                aspectRatio: _controller.value.aspectRatio,
+                                child: VideoPlayer(_controller),
+                              ) :
+                              CircularProgressIndicator());}): CachedNetworkImage(
                           imageUrl: widget.article.thumbUrl,
                           fit: BoxFit.cover,
                         ),
